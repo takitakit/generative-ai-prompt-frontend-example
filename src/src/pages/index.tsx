@@ -98,8 +98,6 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col py-10 mx-10">
-      <h2>Open AI Completions</h2>
-
       <label htmlFor="model-select" className="block mb-2">Model</label>
       <select
         id="model-select"
