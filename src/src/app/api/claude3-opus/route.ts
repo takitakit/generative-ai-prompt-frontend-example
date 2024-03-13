@@ -8,28 +8,32 @@ const anthropic = new Anthropic({
  
 // IMPORTANT! Set the runtime to edge
 export const runtime = 'edge';
- 
+
 export async function POST(req: Request) {
   // Extract the `prompt` from the body of the request
-  const { messages } = await req.json();
+  const { messages }: {messages: Anthropic.Messages.MessageParam[]} = await req.json();
 
   let system = '';
-  const systemIndex = messages.findIndex(m => m.role === 'system');
-  if (systemIndex !== -1) {
-    system = systemIndex !== -1 ? messages[systemIndex].content : '';
-    messages.splice(systemIndex, 1);
-  }
- 
+  const filteredMessages = messages.filter((m, index) => {
+    const isTargetRole = m.role === 'user' || m.role === 'assistant';
+    // 削除対象であればsystemにそのcontentを保持しますが、
+    // 最後に該当するものだけが必要なため、毎回更新します。
+    if (!isTargetRole) {
+      system = m.content as string;
+    }
+    return isTargetRole;
+  });
+
   // Ask Claude for a streaming chat completion given the prompt
   const response = await anthropic.messages.create({
-    messages,
+    messages: filteredMessages,
     system,
     model: 'claude-3-opus-20240229',
     stream: true,
     max_tokens: 2000,
   });
 
-  console.log('claude-opus response', system, messages);
+  console.log('claude-sonnet response', system, messages);
  
   // Convert the response into a friendly text-stream
   const stream = AnthropicStream(response);
