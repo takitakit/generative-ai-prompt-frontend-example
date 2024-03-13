@@ -8,14 +8,20 @@ export const runtime = 'edge';
  
 // convert messages from the Vercel AI SDK Format to the format
 // that is expected by the Google GenAI SDK
-const buildGoogleGenAIPrompt = (messages: Message[]) => ({
-  contents: messages
+// const buildGoogleGenAIPrompt = (messages: Message[]) => ({
+//   contents: messages
+//     .filter(message => message.role === 'user' || message.role === 'assistant')
+//     .map(message => ({
+//       role: message.role === 'user' ? 'user' : 'model',
+//       parts: [{ text: message.content }],
+//     })),
+// });
+
+const buildGoogleGenAIPrompt = (messages: Message[]) => 
+  messages
     .filter(message => message.role === 'user' || message.role === 'assistant')
-    .map(message => ({
-      role: message.role === 'user' ? 'user' : 'model',
-      parts: [{ text: message.content }],
-    })),
-});
+    .map(message => message.content)
+    .join('\n');
  
 export async function POST(req: Request) {
   // Extract the `prompt` from the body of the request
